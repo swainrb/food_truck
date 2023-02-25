@@ -7,7 +7,7 @@ import Config
 # Run `mix help test` for more information.
 config :food_truck, FoodTruck.Repo,
   username: "postgres",
-  password: "postgres",
+  password: "password",
   hostname: "localhost",
   database: "food_truck_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
