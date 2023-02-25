@@ -48,7 +48,7 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
          food_trucks_json <-
            food_trucks_json.body,
          {:ok, food_trucks} <- Jason.decode(food_trucks_json) do
-      {:ok, food_trucks}
+      food_trucks
     else
       {:error, %Jason.DecodeError{}} -> {:error, "Invalid json returned"}
       err -> err
