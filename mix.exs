@@ -50,7 +50,9 @@ defmodule FoodTruck.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8"},
-      {:exvcr, "~> 0.11", only: :test}
+      {:exvcr, "~> 0.11", only: :test},
+      {:geo_postgis, "~> 3.4"},
+      {:ex_machina, "~> 2.7.0", only: :test}
     ]
   end
 

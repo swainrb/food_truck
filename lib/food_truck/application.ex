@@ -18,7 +18,7 @@ defmodule FoodTruck.Application do
       FoodTruckWeb.Endpoint,
       # Start a worker by calling: FoodTruck.Worker.start_link(arg)
       # {FoodTruck.Worker, arg}
-      FoodTruck.FoodItems
+      FoodTruck.Trucks.FoodItems
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

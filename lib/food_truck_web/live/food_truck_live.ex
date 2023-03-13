@@ -5,7 +5,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
   alias IO
 
   alias Phoenix.LiveView.JS
-  alias FoodTruck.FoodItems
+  alias FoodTruck.Trucks.FoodItems
   alias FoodTruckWeb.SFFoodTruckHTTP
 
   def mount(_params, _session, socket) do
@@ -30,14 +30,14 @@ defmodule FoodTruckWeb.FoodTruckLive do
         <%= text_input f, :food_item, value: @food_type %>
         <%= error_tag f, :food_item %>
         <%= for item <- @food_items do %>
-          <div class="suggestion" phx-click={JS.push("select_item", value: %{item: item, food_type: item})}>
+          <div class="selection" phx-click={JS.push("select_item", value: %{item: item, food_type: item})}>
             <%= item %>
           </div>
         <% end %>
       </.form>
       <h2>Trucks</h2>
       <%= for food_truck <- @food_trucks do %>
-        <div class="suggestion">
+        <div class="selection">
           <div><h3><%= food_truck["applicant"] %></h3></div>
           <div><h4><%= food_truck["address"] %></h4></div>
           <div><%= food_truck["fooditems"] %></div>

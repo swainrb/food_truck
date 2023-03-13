@@ -5,13 +5,11 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
   @fields_map %{
     "objectid" => "object_id",
     "applicant" => "applicant",
-    "facilitytype" => "facility_type",
     "locationdescription" => "location_description",
     "address" => "address",
     "fooditems" => "food_items",
-    "schedule" => "schedule",
-    "dayshours" => "days_hours",
-    "location" => "location"
+    "latitude" => "latitude",
+    "longitude" => "longitude"
   }
 
   def all_food_items() do

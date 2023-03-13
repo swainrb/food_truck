@@ -13,7 +13,6 @@ defmodule FoodTruckWeb.SFFoodTruckHTTPTest do
   test "GET all_food_items" do
     use_cassette "get_all_food_items" do
       food_items = SFFoodTruckHTTP.all_food_items()
-      IO.inspect(food_items, limit: :infinity)
 
       assert food_items ==
                MapSet.new([

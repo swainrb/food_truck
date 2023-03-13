@@ -1,4 +1,4 @@
-defmodule FoodTruck.FoodItems do
+defmodule FoodTruck.Trucks.FoodItems do
   use GenServer
 
   alias FoodTruckWeb.SFFoodTruckHTTP
