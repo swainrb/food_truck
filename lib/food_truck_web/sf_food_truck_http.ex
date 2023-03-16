@@ -2,43 +2,45 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
   alias HTTPoison
   alias IO
 
-  @fields_map %{
-    "objectid" => "object_id",
-    "applicant" => "applicant",
-    "locationdescription" => "location_description",
-    "address" => "address",
-    "fooditems" => "food_items",
-    "latitude" => "latitude",
-    "longitude" => "longitude"
-  }
+  @fields [
+    "objectid",
+    "applicant",
+    "locationdescription",
+    "address",
+    "fooditems",
+    "latitude",
+    "longitude"
+  ]
 
   def all_food_items() do
     with {:ok, food_trucks_json} <- get_food_trucks("$select=fooditems"),
          food_trucks_json <-
            food_trucks_json.body,
          {:ok, food_items} <- Jason.decode(food_trucks_json) do
-      Enum.reduce(food_items, MapSet.new(), &split_food_items_string(&1, &2))
+      Enum.reduce(food_items, MapSet.new(), &split_food_items_strings(&1, &2))
     else
       {:error, %Jason.DecodeError{}} -> {:error, "Invalid json returned"}
       err -> err
     end
   end
 
-  defp split_food_items_string(food_items, acc) do
+  defp split_food_items_strings(food_items, acc) do
     Map.values(food_items)
     |> List.first()
-    |> String.downcase()
-    |> String.split(~r";|:| ")
+    |> split_food_items_string()
     |> Enum.map(&String.trim(&1))
     |> MapSet.new()
     |> MapSet.union(acc)
   end
 
+  defp split_food_items_string(food_items) do
+    food_items
+    |> String.downcase()
+    |> String.split(~r";|:| ")
+  end
+
   def filter_by_food_item(food_item) do
-    select_fields =
-      @fields_map
-      |> Map.keys()
-      |> Enum.join(",")
+    select_fields = Enum.join(@fields, ",")
 
     query = "$select=#{select_fields}&$where=upper(fooditems) like'%#{String.upcase(food_item)}%'"
 
@@ -46,7 +48,7 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
          food_trucks_json <-
            food_trucks_json.body,
          {:ok, food_trucks} <- Jason.decode(food_trucks_json) do
-      food_trucks
+      Enum.map(food_trucks, &Map.put(&1, "fooditems", split_food_items_string(&1["fooditems"])))
     else
       {:error, %Jason.DecodeError{}} -> {:error, "Invalid json returned"}
       err -> err
