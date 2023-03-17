@@ -6,7 +6,7 @@ defmodule FoodTruck.Trucks.UserTruck do
   schema "users_trucks" do
     belongs_to :user, User
     belongs_to :truck, Truck
-    field :choice_date, :date
+    field :selection_date, :date
 
     timestamps()
   end

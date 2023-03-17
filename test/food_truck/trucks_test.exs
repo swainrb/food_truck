@@ -38,13 +38,13 @@ defmodule FoodTruck.TrucksTest do
     end
   end
 
-  describe "insert_truck_selection_for_user" do
+  describe "record_truck_selection_for_user" do
     test "inserts users truck choice for existing truck" do
       user = user_fixture()
       truck = Factory.insert(:truck)
 
       assert {:ok, %UserTruck{user_id: user_id, truck_id: truck_id}} =
-               Trucks.insert_truck_selection_for_user(user.id, truck)
+               Trucks.record_truck_selection_for_user(user.id, truck)
     end
 
     test "inserts truck if user exists and truck is unstored" do
@@ -52,7 +52,7 @@ defmodule FoodTruck.TrucksTest do
       truck = Factory.build(:truck)
 
       assert {:ok, %UserTruck{user_id: user_id, truck_id: truck_id}} =
-               Trucks.insert_truck_selection_for_user(user.id, truck)
+               Trucks.record_truck_selection_for_user(user.id, truck)
 
       assert %Truck{id: id} = Repo.get(Truck, truck_id)
     end
@@ -61,7 +61,7 @@ defmodule FoodTruck.TrucksTest do
       truck = Factory.build(:truck)
 
       assert {:error, "User not registered"} =
-               Trucks.insert_truck_selection_for_user(99_999_999_999, truck)
+               Trucks.record_truck_selection_for_user(99_999_999_999, truck)
     end
   end
 end

@@ -89,7 +89,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
       }
     }
 
-    Trucks.insert_truck_selection_for_user(socket.assigns.user_token, truck)
+    Trucks.record_truck_selection_for_user(socket.assigns.user_token, truck)
     {:noreply, assign(socket, your_selection: food_truck)}
   end
 end

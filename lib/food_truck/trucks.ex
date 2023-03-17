@@ -1,7 +1,6 @@
 defmodule FoodTruck.Trucks do
   import Ecto.Query, warn: false
   alias FoodTruck.Accounts.UserToken
-  alias FoodTruck.Accounts.User
   alias FoodTruck.Trucks.UserTruck
   alias FoodTruck.Repo
 
@@ -15,11 +14,14 @@ defmodule FoodTruck.Trucks do
     Repo.insert(truck, on_conflict: [set: [name: truck.name]], conflict_target: :object_id)
   end
 
-  def insert_truck_selection_for_user(user_token, truck = %Truck{}) do
-    with {:ok, user_id_query} <- UserToken.verify_session_token_query(user_token),
-         user <- Repo.one(user_id_query) do
-      %UserTruck{user: user, truck: truck, choice_date: Date.utc_today()}
-      |> Repo.insert()
+  def record_truck_selection_for_user(user_token, truck = %Truck{}) do
+    with {:ok, user_query} <- UserToken.verify_session_token_query(user_token),
+         user <- Repo.one(user_query) do
+      %UserTruck{user: user, truck: truck, selection_date: Date.utc_today()}
+      |> Repo.insert(
+        on_conflict: [set: [truck_id: truck.id]],
+        conflict_target: [:user_id, :truck_id, :selection_date]
+      )
     else
       nil -> {:error, "User not registered"}
     end

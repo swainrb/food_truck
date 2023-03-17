@@ -9,6 +9,7 @@ defmodule FoodTruck.Trucks.Truck do
     field :address, :string
     field :food_items, {:array, :string}
     field :location, Geo.PostGIS.Geometry
+    field :selection_date, :date
 
     has_many :users_trucks, UserTruck
 
