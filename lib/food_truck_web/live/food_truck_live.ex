@@ -72,24 +72,10 @@ defmodule FoodTruckWeb.FoodTruckLive do
   end
 
   def handle_event("select_food_truck", %{"food_truck" => food_truck}, socket) do
-    {longitude, _remainder} = Float.parse(food_truck["longitude"])
-    {latitude, _remainder} = Float.parse(food_truck["latitude"])
-    {object_id, _remainder} = Integer.parse(food_truck["objectid"])
+    food_truck
+    |> Trucks.get_or_populate_truck()
+    |> Trucks.record_truck_selection_for_user(socket.assigns.user_token)
 
-    truck = %Truck{
-      object_id: object_id,
-      name: food_truck["applicant"],
-      location_description: food_truck["locationdescription"],
-      address: food_truck["address"],
-      food_items: food_truck["fooditems"],
-      location: %Geo.Point{
-        coordinates: {longitude, latitude},
-        properties: %{},
-        srid: 4326
-      }
-    }
-
-    Trucks.record_truck_selection_for_user(socket.assigns.user_token, truck)
     {:noreply, assign(socket, your_selection: food_truck)}
   end
 end

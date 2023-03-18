@@ -10,11 +10,12 @@ defmodule FoodTruck.Repo.Migrations.AddTrucksTable do
       add :location_description, :string, null: false
       add :address, :string, null: false
       add :food_items, {:array, :string}, null: false
+      add :selection_date, :date, null: false
       timestamps()
     end
 
     execute("SELECT AddGeometryColumn('trucks', 'location', 4326, 'POINT', 2)")
 
-    create unique_index(:trucks, :object_id)
+    create unique_index(:trucks, [:object_id, :selection_date])
   end
 end
