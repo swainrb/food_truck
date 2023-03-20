@@ -10,6 +10,6 @@ defmodule FoodTruck.Repo.Migrations.AddUsersTrucksTable do
       timestamps()
     end
 
-    create unique_index(:users_trucks, [:user_id, :truck_id, :selection_date])
+    create unique_index(:users_trucks, [:user_id, :selection_date])
   end
 end

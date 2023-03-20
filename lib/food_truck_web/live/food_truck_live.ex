@@ -30,7 +30,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
         <div class="selection">
           <div><h3><%= @your_selection["applicant"] %></h3></div>
           <div><h4><%= @your_selection["address"] %></h4></div>
-          <div><%= @your_selection["fooditems"] %></div>
+          <div><%= Enum.join(@your_selection["fooditems"], ", ") %></div>
         </div>
       <% end %>
     <div class="search">
@@ -49,7 +49,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
         <div class="selection" phx-click={JS.push("select_food_truck", value: %{food_truck: food_truck})}>
           <div><h3><%= food_truck["applicant"] %></h3></div>
           <div><h4><%= food_truck["address"] %></h4></div>
-          <div><%= food_truck["fooditems"] %></div>
+          <div><%= Enum.join(food_truck["fooditems"], ", ") %></div>
         </div>
       <% end %>
     </div>
@@ -73,7 +73,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
 
   def handle_event("select_food_truck", %{"food_truck" => food_truck}, socket) do
     food_truck
-    |> Trucks.get_or_populate_truck()
+    |> Trucks.get_or_insert_truck()
     |> Trucks.record_truck_selection_for_user(socket.assigns.user_token)
 
     {:noreply, assign(socket, your_selection: food_truck)}

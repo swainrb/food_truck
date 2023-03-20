@@ -36,7 +36,7 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
   defp split_food_items_string(food_items) do
     food_items
     |> String.downcase()
-    |> String.split(~r";|:| ")
+    |> String.split(~r";|:")
   end
 
   def filter_by_food_item(food_item) do
