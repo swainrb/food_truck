@@ -37,6 +37,7 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
     food_items
     |> String.downcase()
     |> String.split(~r";|:")
+    |> Enum.map(&String.trim/1)
   end
 
   def filter_by_food_item(food_item) do

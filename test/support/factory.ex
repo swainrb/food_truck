@@ -12,7 +12,8 @@ defmodule FoodTruck.Factory do
         coordinates: {-122.40689189299718, 37.786856111883054},
         properties: %{},
         srid: 4326
-      }
+      },
+      selection_date: Date.utc_today()
     }
   end
 end
