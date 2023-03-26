@@ -63,18 +63,11 @@ defmodule FoodTruck.TrucksTest do
     end
   end
 
-  # describe "populate_food_truck" do
-  #   test "returns a truck struct given valid map" do
-  #     assert truck = %Truck{} = Trucks.populate_food_truck(@food_truck_json, Date.utc_today())
-  #     assert truck.id == nil
-  #   end
-  # end
-
   describe "record_truck_selection_for_user" do
     test "inserts users truck choice for existing truck" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      food_truck = food_truck_string_params()
+      food_truck = Factory.food_truck_string_params()
 
       {:ok, truck} =
         food_truck
@@ -91,7 +84,7 @@ defmodule FoodTruck.TrucksTest do
     test "inserts truck if user exists and truck is unstored" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      truck = food_truck_string_params()
+      truck = Factory.food_truck_string_params()
 
       assert {:ok, %UserTruck{user_id: user_id, truck_id: truck_id}} =
                Trucks.record_truck_selection_for_user(truck, token)
@@ -102,34 +95,18 @@ defmodule FoodTruck.TrucksTest do
     end
 
     test "doesn't insert truck for bad user session" do
-      truck = food_truck_string_params()
+      truck = Factory.food_truck_string_params()
       token = :crypto.strong_rand_bytes(32)
 
       assert {:error, "Invalid user session"} =
                Trucks.record_truck_selection_for_user(truck, token)
     end
 
-    test "returns error for food truck map error" do
-      user = user_fixture()
-      token = Accounts.generate_user_session_token(user)
-      Trucks.record_truck_selection_for_user(%{}, token, Date.utc_today())
-
-      assert {:error, "Bad food truck map"} ==
-               Trucks.record_truck_selection_for_user(%{}, token, Date.utc_today())
-
-      assert {:error, "Couldn't parse numerical values for food truck map"} ==
-               Trucks.record_truck_selection_for_user(
-                 %{food_truck_string_params() | "longitude" => "a"},
-                 token,
-                 Date.utc_today()
-               )
-    end
-
     test "updates truck for user with existing selection" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      truck1 = food_truck_string_params()
-      truck2 = food_truck_string_params()
+      truck1 = Factory.food_truck_string_params()
+      truck2 = Factory.food_truck_string_params()
 
       Trucks.record_truck_selection_for_user(truck1, token)
 
@@ -147,33 +124,41 @@ defmodule FoodTruck.TrucksTest do
       {object_id, _} = Integer.parse(truck2["objectid"])
       assert user_truck.truck.object_id == object_id
     end
-  end
 
-  defp food_truck_string_params(params \\ %{}) do
-    :truck
-    |> Factory.string_params_for(params)
-    |> food_truck_map_from_string_params()
-  end
+    test "multiple users with the same truck selection are associated with one truck entry" do
+      user1 = user_fixture()
+      user2 = user_fixture()
+      token1 = Accounts.generate_user_session_token(user1)
+      token2 = Accounts.generate_user_session_token(user2)
 
-  defp food_truck_map_from_string_params(food_truck_string_params) do
-    Enum.reduce(food_truck_string_params, %{}, fn {key, value}, acc ->
-      cond do
-        key == "name" ->
-          Map.put(acc, "applicant", value)
+      truck = Factory.food_truck_string_params()
 
-        key == "location" ->
-          {latitude, longitude} = value["coordinates"]
+      {:ok, %UserTruck{truck_id: truck_id1}} =
+        Trucks.record_truck_selection_for_user(truck, token1)
 
-          acc
-          |> Map.put("longitude", Float.to_string(longitude))
-          |> Map.put("latitude", Float.to_string(latitude))
+      {:ok, %UserTruck{truck_id: truck_id2}} =
+        Trucks.record_truck_selection_for_user(truck, token2)
 
-        key == "object_id" ->
-          Map.put(acc, "objectid", Integer.to_string(value))
+      assert truck_id1 == truck_id2
+    end
 
-        true ->
-          Map.put(acc, String.replace(key, "_", ""), value)
-      end
-    end)
+    test "the same truck selection on different days get seperate entries" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      truck = Factory.food_truck_string_params()
+
+      {:ok, %UserTruck{user_id: user_id1, truck_id: truck_id1}} =
+        Trucks.record_truck_selection_for_user(
+          truck,
+          token,
+          Date.utc_today() |> Date.add(-1)
+        )
+
+      {:ok, %UserTruck{user_id: user_id2, truck_id: truck_id2}} =
+        Trucks.record_truck_selection_for_user(truck, token)
+
+      assert user_id1 == user_id2
+      assert truck_id1 != truck_id2
+    end
   end
 end

@@ -60,4 +60,8 @@ defmodule FoodTruck.Trucks.Truck do
       _ -> {:error, "Couldn't parse numerical values for food truck map"}
     end
   end
+
+  def populate_truck(_, _) do
+    {:error, "Bad food truck map"}
+  end
 end
