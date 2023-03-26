@@ -72,9 +72,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
   end
 
   def handle_event("select_food_truck", %{"food_truck" => food_truck}, socket) do
-    food_truck
-    |> Trucks.get_or_populate_truck()
-    |> Trucks.record_truck_selection_for_user(socket.assigns.user_token)
+    Trucks.record_truck_selection_for_user(food_truck, socket.assigns.user_token)
 
     {:noreply, assign(socket, your_selection: food_truck)}
   end

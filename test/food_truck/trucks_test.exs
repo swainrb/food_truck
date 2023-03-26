@@ -9,26 +9,6 @@ defmodule FoodTruck.TrucksTest do
 
   import FoodTruck.AccountsFixtures
 
-  @food_truck_json %{
-    "address" => "66 POTRERO AVE",
-    "applicant" => "Natan's Catering",
-    "fooditems" => [
-      "burgers",
-      "melts",
-      "hot dogs",
-      "burritos",
-      "sandwiches",
-      "fries",
-      "onion rings",
-      "drinks"
-    ],
-    "latitude" => "37.76854328902419",
-    "locationdescription" =>
-      "POTRERO AVE: 10TH ST \\ BRANNAN ST \\ DIVISION ST to ALAMEDA ST (1 - 99)",
-    "longitude" => "-122.40849289243862",
-    "objectid" => "1660523"
-  }
-
   describe "get_truck_by_object_id" do
     test "does not return truck for invalid object_id" do
       refute Trucks.get_truck_by_object_id(99_999_999_999)
@@ -57,6 +37,11 @@ defmodule FoodTruck.TrucksTest do
 
     test "does not return truck for out of bounds date" do
       truck = Factory.insert(:truck)
+
+      refute Trucks.get_truck_by_object_id_and_selection_date(
+               truck.object_id,
+               Date.utc_today() |> Date.add(1)
+             )
     end
   end
 
@@ -78,57 +63,117 @@ defmodule FoodTruck.TrucksTest do
     end
   end
 
-  describe "get_or_populate_truck" do
-    test "returns an existing truck with an id" do
-      truck = Factory.insert(:truck, object_id: @food_truck_json["objectid"])
-
-      assert %Truck{id: id} = Trucks.get_or_populate_truck(@food_truck_json, Date.utc_today())
-      assert truck.id == id
-    end
-
-    test "returns a truck struct given valid map" do
-      assert truck = %Truck{} = Trucks.get_or_populate_truck(@food_truck_json, Date.utc_today())
-      assert truck.id == nil
-    end
-
-    test "returns error for bad food truck map" do
-      assert {:error, "Bad food truck map"} == Trucks.get_or_populate_truck(%{}, Date.utc_today())
-
-      assert {:error, "Bad food truck map"} ==
-               Trucks.get_or_populate_truck(
-                 %{@food_truck_json | "longitude" => "a"},
-                 Date.utc_today()
-               )
-    end
-  end
+  # describe "populate_food_truck" do
+  #   test "returns a truck struct given valid map" do
+  #     assert truck = %Truck{} = Trucks.populate_food_truck(@food_truck_json, Date.utc_today())
+  #     assert truck.id == nil
+  #   end
+  # end
 
   describe "record_truck_selection_for_user" do
     test "inserts users truck choice for existing truck" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      truck = Factory.insert(:truck)
+      food_truck = food_truck_string_params()
+
+      {:ok, truck} =
+        food_truck
+        |> Truck.populate_truck(Date.utc_today())
+        |> Repo.insert()
 
       assert {:ok, %UserTruck{user_id: user_id, truck_id: truck_id}} =
-               Trucks.record_truck_selection_for_user(truck, token)
+               Trucks.record_truck_selection_for_user(food_truck, token)
+
+      assert user_id == user.id
+      assert truck_id == truck.id
     end
 
     test "inserts truck if user exists and truck is unstored" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      truck = Factory.build(:truck)
+      truck = food_truck_string_params()
 
       assert {:ok, %UserTruck{user_id: user_id, truck_id: truck_id}} =
                Trucks.record_truck_selection_for_user(truck, token)
 
       assert %Truck{id: id} = Repo.get(Truck, truck_id)
+      assert user_id == user.id
+      assert truck_id == id
     end
 
     test "doesn't insert truck for bad user session" do
-      truck = Factory.build(:truck)
+      truck = food_truck_string_params()
       token = :crypto.strong_rand_bytes(32)
 
       assert {:error, "Invalid user session"} =
                Trucks.record_truck_selection_for_user(truck, token)
     end
+
+    test "returns error for food truck map error" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      Trucks.record_truck_selection_for_user(%{}, token, Date.utc_today())
+
+      assert {:error, "Bad food truck map"} ==
+               Trucks.record_truck_selection_for_user(%{}, token, Date.utc_today())
+
+      assert {:error, "Couldn't parse numerical values for food truck map"} ==
+               Trucks.record_truck_selection_for_user(
+                 %{food_truck_string_params() | "longitude" => "a"},
+                 token,
+                 Date.utc_today()
+               )
+    end
+
+    test "updates truck for user with existing selection" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      truck1 = food_truck_string_params()
+      truck2 = food_truck_string_params()
+
+      Trucks.record_truck_selection_for_user(truck1, token)
+
+      {:ok, %{selection_date: selection_date}} =
+        Trucks.record_truck_selection_for_user(truck2, token)
+
+      user_truck =
+        Repo.one(
+          from ut in UserTruck,
+            where: ut.user_id == ^user.id,
+            where: ut.selection_date == ^selection_date,
+            preload: [:truck]
+        )
+
+      {object_id, _} = Integer.parse(truck2["objectid"])
+      assert user_truck.truck.object_id == object_id
+    end
+  end
+
+  defp food_truck_string_params(params \\ %{}) do
+    :truck
+    |> Factory.string_params_for(params)
+    |> food_truck_map_from_string_params()
+  end
+
+  defp food_truck_map_from_string_params(food_truck_string_params) do
+    Enum.reduce(food_truck_string_params, %{}, fn {key, value}, acc ->
+      cond do
+        key == "name" ->
+          Map.put(acc, "applicant", value)
+
+        key == "location" ->
+          {latitude, longitude} = value["coordinates"]
+
+          acc
+          |> Map.put("longitude", Float.to_string(longitude))
+          |> Map.put("latitude", Float.to_string(latitude))
+
+        key == "object_id" ->
+          Map.put(acc, "objectid", Integer.to_string(value))
+
+        true ->
+          Map.put(acc, String.replace(key, "_", ""), value)
+      end
+    end)
   end
 end

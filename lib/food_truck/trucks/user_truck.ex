@@ -19,6 +19,7 @@ defmodule FoodTruck.Trucks.UserTruck do
     user_truck
     |> cast(attrs, [:selection_date])
     |> validate_required([:user, :truck, :selection_date])
+    |> cast_assoc(:truck, with: &FoodTruck.Trucks.Truck.changeset/2)
     |> unsafe_validate_unique([:user, :selection_date], Repo)
     |> unique_constraint([:user, :selection_date])
   end

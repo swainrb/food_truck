@@ -1,6 +1,5 @@
 defmodule FoodTruckWeb.SFFoodTruckHTTP do
   alias HTTPoison
-  alias IO
 
   @fields [
     "objectid",

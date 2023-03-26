@@ -20,65 +20,39 @@ defmodule FoodTruck.Trucks do
     |> Repo.insert(on_conflict: :nothing)
   end
 
-  def get_or_populate_truck(food_truck, selection_date \\ Date.utc_today())
-
-  def get_or_populate_truck(
-        %{
-          "objectid" => object_id,
-          "longitude" => longitude,
-          "latitude" => latitude,
-          "applicant" => applicant,
-          "locationdescription" => location_description,
-          "address" => address,
-          "fooditems" => food_items
-        },
-        selection_date
-      ) do
-    if truck = get_truck_by_object_id_and_selection_date(object_id, selection_date) do
-      truck
-    else
-      with {longitude, _remainder} <- Float.parse(longitude),
-           {latitude, _remainder} <- Float.parse(latitude),
-           {object_id, _remainder} <- Integer.parse(object_id) do
-        %Truck{
-          object_id: object_id,
-          name: applicant,
-          location_description: location_description,
-          address: address,
-          food_items: food_items,
-          location: %Geo.Point{
-            coordinates: {longitude, latitude},
-            properties: %{},
-            srid: 4326
-          },
-          selection_date: Date.utc_today()
-        }
-      else
-        _ -> {:error, "Bad food truck map"}
-      end
-    end
-  end
-
-  def get_or_populate_truck(_, _) do
-    {:error, "Bad food truck map"}
-  end
-
-  def record_truck_selection_for_user(truck = %Truck{}, user_token) do
+  def record_truck_selection_for_user(food_truck, user_token, selection_date \\ Date.utc_today()) do
     with {:ok, user_query} <- UserToken.verify_session_token_query(user_token),
          user = %User{} <- Repo.one(user_query),
-         {:ok, truck} <- get_or_insert_truck(truck) do
-      %UserTruck{user: user, truck: truck, selection_date: Date.utc_today()}
+         truck = %Truck{} <- get_or_populate_truck(food_truck, selection_date) do
+      %UserTruck{user: user, truck: truck, selection_date: selection_date}
       |> UserTruck.changeset()
       |> Repo.insert(
-        on_conflict: [set: [truck_id: truck.id]],
+        on_conflict: {:replace, [:truck_id]},
         conflict_target: [:user_id, :selection_date]
       )
     else
       nil ->
         {:error, "Invalid user session"}
 
-      {:error, error} ->
-        {:error, error}
+      error ->
+        error
     end
+  end
+
+  defp get_or_populate_truck(
+         %{
+           "objectid" => object_id
+         } = food_truck,
+         selection_date
+       ) do
+    if truck = get_truck_by_object_id_and_selection_date(object_id, selection_date) do
+      truck
+    else
+      Truck.populate_truck(food_truck, selection_date)
+    end
+  end
+
+  defp get_or_populate_truck(_, _) do
+    {:error, "Bad food truck map"}
   end
 end

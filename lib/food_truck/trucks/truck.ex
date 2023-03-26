@@ -27,4 +27,37 @@ defmodule FoodTruck.Trucks.Truck do
     |> unsafe_validate_unique([:object_id, :selection_date], Repo)
     |> unique_constraint([:object_id, :selection_date])
   end
+
+  def populate_truck(
+        %{
+          "objectid" => object_id,
+          "longitude" => longitude,
+          "latitude" => latitude,
+          "applicant" => applicant,
+          "locationdescription" => location_description,
+          "address" => address,
+          "fooditems" => food_items
+        },
+        selection_date
+      ) do
+    with {longitude, _remainder} <- Float.parse(longitude),
+         {latitude, _remainder} <- Float.parse(latitude),
+         {object_id, _remainder} <- Integer.parse(object_id) do
+      %__MODULE__{
+        object_id: object_id,
+        name: applicant,
+        location_description: location_description,
+        address: address,
+        food_items: food_items,
+        location: %Geo.Point{
+          coordinates: {longitude, latitude},
+          properties: %{},
+          srid: 4326
+        },
+        selection_date: selection_date
+      }
+    else
+      _ -> {:error, "Couldn't parse numerical values for food truck map"}
+    end
+  end
 end
