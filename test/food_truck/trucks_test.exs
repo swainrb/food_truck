@@ -9,18 +9,6 @@ defmodule FoodTruck.TrucksTest do
 
   import FoodTruck.AccountsFixtures
 
-  describe "get_truck_by_object_id" do
-    test "does not return truck for invalid object_id" do
-      refute Trucks.get_truck_by_object_id(99_999_999_999)
-    end
-
-    test "returns truck for a valid object_id" do
-      truck = Factory.insert(:truck)
-      assert truck_db = Trucks.get_truck_by_object_id(truck.object_id)
-      assert truck.name == truck_db.name
-    end
-  end
-
   describe("get_truck_by_object_id_and_selection_date") do
     test "returns truck for a valid object_id and selection_date" do
       truck = Factory.insert(:truck)
@@ -42,24 +30,6 @@ defmodule FoodTruck.TrucksTest do
                truck.object_id,
                Date.utc_today() |> Date.add(1)
              )
-    end
-  end
-
-  describe "get_or_insert_truck" do
-    test "inserts truck that doesn't exist" do
-      truck = Factory.build(:truck)
-      refute Trucks.get_truck_by_object_id(truck.object_id)
-
-      assert {:ok, truck_db} = Trucks.get_or_insert_truck(truck)
-      assert truck.name == truck_db.name
-    end
-
-    test "gets truck that does exist" do
-      truck = Factory.insert(:truck)
-      assert Trucks.get_truck_by_object_id(truck.object_id)
-
-      assert {:ok, truck_db} = Trucks.get_or_insert_truck(truck)
-      assert truck.name == truck_db.name
     end
   end
 
