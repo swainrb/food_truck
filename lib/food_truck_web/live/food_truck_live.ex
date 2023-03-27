@@ -4,9 +4,10 @@ defmodule FoodTruckWeb.FoodTruckLive do
 
   alias Phoenix.LiveView.JS
   alias FoodTruck.Trucks
-  alias FoodTruck.Trucks.{FoodItems, Truck}
+  alias FoodTruck.Trucks.{FoodItems, TruckSelections}
   alias FoodTruckWeb.SFFoodTruckHTTP
 
+  @impl true
   def mount(_params, session, socket) do
     socket =
       assign(socket,
@@ -16,12 +17,15 @@ defmodule FoodTruckWeb.FoodTruckLive do
         item: "",
         food_trucks: [],
         your_selection: nil,
-        user_token: session["user_token"]
+        user_token: session["user_token"],
+        truck_selections: []
       )
 
+    Phoenix.PubSub.subscribe(FoodTruck.PubSub, TruckSelections.topic())
     {:ok, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <h1>Food Truck</h1>
@@ -31,6 +35,15 @@ defmodule FoodTruckWeb.FoodTruckLive do
           <div><h3><%= @your_selection["applicant"] %></h3></div>
           <div><h4><%= @your_selection["address"] %></h4></div>
           <div><%= Enum.join(@your_selection["fooditems"], ", ") %></div>
+        </div>
+      <% end %>
+    <h2>Selections</h2>
+    <%= for {food_truck, number_of_selections} <- @truck_selections do %>
+        <div class="selection">
+          <div><h3 align="right"><%= number_of_selections %></h3></div>
+          <div><h3><%= food_truck.name %></h3></div>
+          <div><h4><%= food_truck.address %></h4></div>
+          <div><%= Enum.join(food_truck.food_items, ", ") %></div>
         </div>
       <% end %>
     <div class="search">
@@ -56,6 +69,7 @@ defmodule FoodTruckWeb.FoodTruckLive do
     """
   end
 
+  @impl true
   def handle_event("suggest", %{"food_item" => %{"food_item" => ""}}, socket) do
     {:noreply, assign(socket, food_type: "", food_items: [])}
   end
@@ -75,5 +89,10 @@ defmodule FoodTruckWeb.FoodTruckLive do
     Trucks.record_truck_selection_for_user(food_truck, socket.assigns.user_token)
 
     {:noreply, assign(socket, your_selection: food_truck)}
+  end
+
+  @impl true
+  def handle_info({:update_truck_selections, selections}, socket) do
+    {:noreply, assign(socket, :truck_selections, selections)}
   end
 end
