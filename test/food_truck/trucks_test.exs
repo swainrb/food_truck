@@ -33,7 +33,7 @@ defmodule FoodTruck.TrucksTest do
     end
   end
 
-  describe "aggregate_truck_selections_for_date" do
+  describe "aggregate_and_sort_truck_selections_for_date" do
     test "groups choices with count" do
       user1 = user_fixture()
       user2 = user_fixture()
