@@ -17,7 +17,7 @@ defmodule FoodTruck.Trucks.FoodItemsTest do
       end)
 
       assert ["aabb", "aabc"] ==
-               FoodItems.search_food_items(%{"food_item" => "a"})
+               FoodItems.search_food_items(%{"food_item" => "aa"})
     end
   end
 end

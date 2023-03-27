@@ -9,6 +9,22 @@ defmodule FoodTruck.Trucks do
   def get_truck_by_object_id_and_selection_date(object_id, selection_date),
     do: Repo.get_by(Truck, object_id: object_id, selection_date: selection_date)
 
+  def aggregate_and_sort_truck_selections_for_date(selection_date \\ Date.utc_today()) do
+    Repo.all(
+      from ut in UserTruck,
+        where: ut.selection_date == ^selection_date,
+        preload: [:truck]
+    )
+    |> Enum.reduce(%{}, fn user_truck, acc ->
+      if acc[user_truck.truck] do
+        %{acc | user_truck.truck => acc[user_truck.truck] + 1}
+      else
+        Map.put(acc, user_truck.truck, 1)
+      end
+    end)
+    |> Enum.sort_by(&elem(&1, 1), :desc)
+  end
+
   def record_truck_selection_for_user(food_truck, user_token, selection_date \\ Date.utc_today()) do
     with {:ok, user_query} <- UserToken.verify_session_token_query(user_token),
          user = %User{} <- Repo.one(user_query),

@@ -29,7 +29,6 @@ defmodule FoodTruck.DataCase do
 
   setup tags do
     FoodTruck.DataCase.setup_sandbox(tags)
-    Mox.stub_with(FoodTruckWeb.MockSFFoodTruckHTTP, FoodTruckWeb.SFFoodTruckHTTP)
     :ok
   end
 

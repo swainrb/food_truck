@@ -33,6 +33,26 @@ defmodule FoodTruck.TrucksTest do
     end
   end
 
+  describe "aggregate_truck_selections_for_date" do
+    test "groups choices with count" do
+      user1 = user_fixture()
+      user2 = user_fixture()
+      user3 = user_fixture()
+      token1 = Accounts.generate_user_session_token(user1)
+      token2 = Accounts.generate_user_session_token(user2)
+      token3 = Accounts.generate_user_session_token(user3)
+
+      truck1 = Factory.food_truck_string_params()
+      truck2 = Factory.food_truck_string_params()
+
+      Trucks.record_truck_selection_for_user(truck1, token1)
+      Trucks.record_truck_selection_for_user(truck1, token2)
+      Trucks.record_truck_selection_for_user(truck2, token3)
+
+      assert [{_, 2}, {_, 1}] = Trucks.aggregate_and_sort_truck_selections_for_date()
+    end
+  end
+
   describe "record_truck_selection_for_user" do
     test "inserts users truck choice for existing truck" do
       user = user_fixture()
