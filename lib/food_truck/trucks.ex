@@ -16,10 +16,12 @@ defmodule FoodTruck.Trucks do
         preload: [:truck]
     )
     |> Enum.reduce(%{}, fn user_truck, acc ->
-      if acc[user_truck.truck] do
-        %{acc | user_truck.truck => acc[user_truck.truck] + 1}
+      truck = user_truck.truck
+
+      if truck_count = acc[truck] do
+        %{acc | truck => truck_count + 1}
       else
-        Map.put(acc, user_truck.truck, 1)
+        Map.put(acc, truck, 1)
       end
     end)
     |> Enum.sort_by(&elem(&1, 1), :desc)
