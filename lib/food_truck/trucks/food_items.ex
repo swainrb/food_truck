@@ -11,13 +11,22 @@ defmodule FoodTruck.Trucks.FoodItems do
     GenServer.call(__MODULE__, {:search_food_items, search_term})
   end
 
-  @impl true
+  @impl GenServer
   def init(_) do
-    food_items = SFFoodTruckHTTP.all_food_items()
-    {:ok, food_items}
+    {:ok, []}
   end
 
-  @impl true
+  @impl GenServer
+  def handle_call({:search_food_items, %{"food_item" => search_term}}, _from, []) do
+    food_items = SFFoodTruckHTTP.all_food_items()
+
+    filtered_items =
+      Enum.filter(food_items, &String.starts_with?(&1, String.downcase(search_term)))
+
+    {:reply, filtered_items, food_items}
+  end
+
+  @impl GenServer
   def handle_call({:search_food_items, %{"food_item" => search_term}}, _from, food_items) do
     filtered_items =
       Enum.filter(food_items, &String.starts_with?(&1, String.downcase(search_term)))

@@ -1,5 +1,6 @@
 defmodule FoodTruckWeb.SFFoodTruckHTTP do
   alias HTTPoison
+  @behaviour SFFoodTruckHttpBehaviour
 
   @fields [
     "objectid",
@@ -12,7 +13,7 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
   ]
 
   def all_food_items() do
-    with {:ok, food_trucks_json} <- get_food_trucks("$select=fooditems"),
+    with {:ok, food_trucks_json} <- impl().get("$select=fooditems"),
          food_trucks_json <-
            food_trucks_json.body,
          {:ok, food_items} <- Jason.decode(food_trucks_json) do
@@ -44,10 +45,8 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
 
     query = "$select=#{select_fields}&$where=upper(fooditems) like'%#{String.upcase(food_item)}%'"
 
-    with {:ok, food_trucks_json} <- get_food_trucks(query),
-         food_trucks_json <-
-           food_trucks_json.body,
-         {:ok, food_trucks} <- Jason.decode(food_trucks_json) do
+    with {:ok, food_trucks_json} <- impl().get(query),
+         {:ok, food_trucks} <- Jason.decode(food_trucks_json.body) do
       Enum.map(food_trucks, &Map.put(&1, "fooditems", split_food_items_string(&1["fooditems"])))
     else
       {:error, %Jason.DecodeError{}} -> {:error, "Invalid json returned"}
@@ -55,7 +54,8 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
     end
   end
 
-  defp get_food_trucks(query) do
+  @impl SFFoodTruckHttpBehaviour
+  def get(query) do
     with encoded_uri <-
            URI.encode("https://data.sfgov.org/resource/rqzj-sfat.json?Status=APPROVED&#{query}"),
          {:ok, result} <- HTTPoison.get(encoded_uri) do
@@ -63,5 +63,9 @@ defmodule FoodTruckWeb.SFFoodTruckHTTP do
     else
       {:error, %HTTPoison.Error{}} -> {:error, "Could not get food trucks"}
     end
+  end
+
+  defp impl do
+    Application.get_env(:food_truck, :http_adapter, FoodTruckWeb.SFFoodTruckHTTP)
   end
 end

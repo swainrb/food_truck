@@ -1,11 +1,7 @@
 defmodule FoodTruck.Trucks.TruckTest do
   use FoodTruck.DataCase
 
-  alias FoodTruck.Accounts
   alias FoodTruck.Trucks.Truck
-  alias FoodTruck.Factory
-
-  import FoodTruck.AccountsFixtures
 
   @food_truck_json %{
     "address" => "66 POTRERO AVE",
@@ -34,9 +30,6 @@ defmodule FoodTruck.Trucks.TruckTest do
     end
 
     test "returns error for food truck map error" do
-      user = user_fixture()
-      token = Accounts.generate_user_session_token(user)
-
       assert {:error, "Bad food truck map"} ==
                Truck.populate_truck(%{}, Date.utc_today())
 

@@ -9,6 +9,9 @@ defmodule FoodTruckWeb.SFFoodTruckHTTPTest do
   end
 
   test "GET all_food_items" do
+    http = Application.get_env(:food_truck, :http_adapter)
+    Application.put_env(:food_truck, :http_adapter, FoodTruckWeb.SFFoodTruckHTTP)
+
     use_cassette "get_all_food_items" do
       food_items = SFFoodTruckHTTP.all_food_items()
 
@@ -179,6 +182,8 @@ defmodule FoodTruckWeb.SFFoodTruckHTTPTest do
                  "water",
                  "waters"
                ])
+
+      Application.put_env(:food_truck, :http_adapter, http)
     end
   end
 end

@@ -6,9 +6,8 @@ defmodule FoodTruck.Trucks do
 
   alias FoodTruck.Trucks.Truck
 
-  def get_truck_by_object_id_and_selection_date(object_id, selection_date) do
-    Repo.get_by(Truck, object_id: object_id, selection_date: selection_date)
-  end
+  def get_truck_by_object_id_and_selection_date(object_id, selection_date),
+    do: Repo.get_by(Truck, object_id: object_id, selection_date: selection_date)
 
   def record_truck_selection_for_user(food_truck, user_token, selection_date \\ Date.utc_today()) do
     with {:ok, user_query} <- UserToken.verify_session_token_query(user_token),
@@ -42,7 +41,5 @@ defmodule FoodTruck.Trucks do
     end
   end
 
-  defp get_or_populate_truck(_, _) do
-    {:error, "Bad food truck map"}
-  end
+  defp get_or_populate_truck(_, _), do: {:error, "Bad food truck map"}
 end

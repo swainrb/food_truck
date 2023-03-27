@@ -8,7 +8,8 @@
 import Config
 
 config :food_truck,
-  ecto_repos: [FoodTruck.Repo]
+  ecto_repos: [FoodTruck.Repo],
+  http_adapter: FoodTruckWeb.SFFoodTruckHTTP
 
 # Configures the endpoint
 config :food_truck, FoodTruckWeb.Endpoint,
