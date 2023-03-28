@@ -1,0 +1,38 @@
+[
+  {
+    "request": {
+      "body": "",
+      "headers": [],
+      "method": "get",
+      "options": [],
+      "request_body": "",
+      "url": "https://data.sfgov.org/resource/rqzj-sfat.json?Status=APPROVED&$select=objectid,applicant,locationdescription,address,fooditems,latitude,longitude&$where=upper(fooditems)%20like'%25KEBA%25'"
+    },
+    "response": {
+      "binary": false,
+      "body": "[{\"objectid\":\"1660691\",\"applicant\":\"Halal Cart, LLC\",\"locationdescription\":\"MONTGOMERY ST: CALIFORNIA ST to SACRAMENTO ST (400 - 499)\",\"address\":\"400 MONTGOMERY ST\",\"fooditems\":\"kebabs: halal gyro: grilled halal meat: refreshments\",\"latitude\":\"37.79314862698347\",\"longitude\":\"-122.4025671755779\"}\n,{\"objectid\":\"1660690\",\"applicant\":\"Halal Cart, LLC\",\"locationdescription\":\"MARKET ST: STEUART ST to SPEAR ST (1 - 99) -- SOUTH --\",\"address\":\"1 MARKET ST\",\"fooditems\":\"kebabs: halal gyro: grilled halal meat: refreshments\",\"latitude\":\"37.793871507150634\",\"longitude\":\"-122.39486523862108\"}\n,{\"objectid\":\"1660693\",\"applicant\":\"Halal Cart, LLC\",\"locationdescription\":\"MARKET ST: FREMONT ST \\\\ FRONT ST to 01ST ST \\\\ BUSH ST (401 - 499) -- SOUTH --\",\"address\":\"455 MARKET ST\",\"fooditems\":\"Gyros: Kebabs: soft drinks: and water\",\"latitude\":\"37.79094704192342\",\"longitude\":\"-122.39863358940373\"}]\n",
+      "headers": {
+        "Server": "nginx",
+        "Date": "Tue, 28 Mar 2023 14:03:20 GMT",
+        "Content-Type": "application/json;charset=utf-8",
+        "Transfer-Encoding": "chunked",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "ETag": "W/\"YWxwaGEuMzkyNF81XzI4MTFCeVNQLTVOUWNveWJnanJvVnh4R2EteTZSX00---gzipnpOlc6X4atoV6W8zj6tvVGsAB6w--gzip--gzip\"",
+        "X-SODA2-Fields": "[\"objectid\",\"applicant\",\"locationdescription\",\"address\",\"fooditems\",\"latitude\",\"longitude\"]",
+        "X-SODA2-Types": "[\"number\",\"text\",\"text\",\"text\",\"text\",\"number\",\"number\"]",
+        "X-SODA2-Data-Out-Of-Date": "false",
+        "X-SODA2-Truth-Last-Modified": "Fri, 17 Mar 2023 12:14:01 GMT",
+        "X-SODA2-Secondary-Last-Modified": "Fri, 17 Mar 2023 12:14:01 GMT",
+        "Last-Modified": "Fri, 17 Mar 2023 12:14:01 GMT",
+        "Vary": "Accept-Encoding",
+        "Age": "0",
+        "X-Socrata-Region": "aws-us-east-1-fedramp-prod",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "X-Socrata-RequestId": "1a32403e601cca0b0b7abb9c03be4757"
+      },
+      "status_code": 200,
+      "type": "ok"
+    }
+  }
+]
