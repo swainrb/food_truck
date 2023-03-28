@@ -9,7 +9,7 @@ defmodule FoodTruck.TrucksTest do
 
   import FoodTruck.AccountsFixtures
 
-  describe("get_truck_by_object_id_and_selection_date") do
+  describe "get_truck_by_object_id_and_selection_date" do
     test "returns truck for a valid object_id and selection_date" do
       truck = Factory.insert(:truck)
 
@@ -30,6 +30,36 @@ defmodule FoodTruck.TrucksTest do
                truck.object_id,
                Date.utc_today() |> Date.add(1)
              )
+    end
+  end
+
+  describe "get_user_selection_for_date" do
+    test "returns truck for user" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      food_truck = Factory.food_truck_string_params()
+      selection_date = Date.utc_today()
+
+      {:ok, truck} =
+        food_truck
+        |> Truck.populate_truck(selection_date)
+        |> Repo.insert()
+
+      Trucks.record_truck_selection_for_user(food_truck, token)
+
+      assert %Truck{id: selection_id} = Trucks.get_user_truck_selection_for_date(token)
+      assert selection_id == truck.id
+    end
+
+    test "returns error for bad user session" do
+      user = user_fixture()
+      token = Accounts.generate_user_session_token(user)
+      food_truck = Factory.food_truck_string_params()
+      bad_token = :crypto.strong_rand_bytes(32)
+
+      Trucks.record_truck_selection_for_user(food_truck, token)
+
+      {:error, "Invalid user session"} = Trucks.get_user_truck_selection_for_date(bad_token)
     end
   end
 

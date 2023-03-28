@@ -9,6 +9,10 @@ defmodule FoodTruckWeb.FoodTruckLive do
 
   @impl true
   def mount(_params, session, socket) do
+    user_token = session["user_token"]
+    user_selection = Trucks.get_user_truck_selection_for_date(user_token)
+    all_selections = TruckSelections.aggregate_and_sort_truck_selections_for_date()
+
     socket =
       assign(socket,
         form: :food_item,
@@ -16,9 +20,9 @@ defmodule FoodTruckWeb.FoodTruckLive do
         food_items: [],
         item: "",
         food_trucks: [],
-        your_selection: nil,
-        user_token: session["user_token"],
-        truck_selections: []
+        your_selection: user_selection,
+        user_token: user_token,
+        truck_selections: all_selections
       )
 
     Phoenix.PubSub.subscribe(FoodTruck.PubSub, TruckSelections.topic())
@@ -32,9 +36,9 @@ defmodule FoodTruckWeb.FoodTruckLive do
     <h2>Your Selection</h2>
       <%= if @your_selection do %>
         <div class="selection">
-          <div><h3><%= @your_selection["applicant"] %></h3></div>
-          <div><h4><%= @your_selection["address"] %></h4></div>
-          <div><%= Enum.join(@your_selection["fooditems"], ", ") %></div>
+          <div><h3><%= @your_selection.name %></h3></div>
+          <div><h4><%= @your_selection.address %></h4></div>
+          <div><%= Enum.join(@your_selection.food_items, ", ") %></div>
         </div>
       <% end %>
     <h2>Selections</h2>
@@ -86,9 +90,9 @@ defmodule FoodTruckWeb.FoodTruckLive do
   end
 
   def handle_event("select_food_truck", %{"food_truck" => food_truck}, socket) do
-    Trucks.record_truck_selection_for_user(food_truck, socket.assigns.user_token)
+    truck = Trucks.record_truck_selection_for_user(food_truck, socket.assigns.user_token)
 
-    {:noreply, assign(socket, your_selection: food_truck)}
+    {:noreply, assign(socket, your_selection: truck)}
   end
 
   @impl true
