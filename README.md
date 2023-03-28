@@ -23,4 +23,5 @@ Hopefully fairly intuitive from here.
 ## Code features
 
  * On startup preloads food items from the San Francisco food truck api into a genserver in `FoodTruck.Trucks.FoodItems` for fast search suggestions.
+ * Uses `Phoenix.PubSub` to push updates over sockets.
  * Uses [ExVCR](https://github.com/parroty/exvcr) for integration type testing that can be run without external interaction until previously recorded cassettes are deleted.
